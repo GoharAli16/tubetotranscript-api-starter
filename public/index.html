@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TubeToTranscript API Starter</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0f172a; color: #e2e8f0; }
+      body { max-width: 760px; margin: 0 auto; padding: 48px 20px; }
+      h1 { margin-bottom: 8px; } p { color: #94a3b8; line-height: 1.6; }
+      form, article { background: #172033; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-top: 28px; }
+      label { display: block; font-weight: 700; margin-bottom: 8px; } input { box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #475569; border-radius: 10px; background: #0f172a; color: inherit; }
+      button { margin-top: 12px; padding: 12px 16px; border: 0; border-radius: 10px; background: #2563eb; color: white; font-weight: 700; cursor: pointer; }
+      button:disabled { opacity: .6; cursor: wait; } #status { min-height: 24px; margin-top: 14px; color: #fbbf24; }
+      #meta { color: #93c5fd; } #transcript { white-space: pre-wrap; line-height: 1.7; }
+      a { color: #93c5fd; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>TubeToTranscript API Starter</h1>
+      <p>Enter a YouTube URL to retrieve its available transcript through a small server-side API proxy.</p>
+
+      <form id="transcript-form">
+        <label for="url">YouTube URL</label>
+        <input id="url" name="url" type="url" required placeholder="https://www.youtube.com/watch?v=..." />
+        <button type="submit">Get transcript</button>
+        <p id="status" role="status"></p>
+      </form>
+
+      <article hidden id="result">
+        <h2 id="title"></h2>
+        <p id="meta"></p>
+        <div id="transcript"></div>
+      </article>
+
+      <p>See the <a href="https://www.tubetotranscript.com/youtube-transcript-api">TubeToTranscript API documentation</a> for batch, playlist, and channel endpoints.</p>
+    </main>
+    <script>
+      const form = document.querySelector('#transcript-form');
+      const urlInput = document.querySelector('#url');
+      const button = form.querySelector('button');
+      const status = document.querySelector('#status');
+      const result = document.querySelector('#result');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        button.disabled = true;
+        status.textContent = 'Fetching transcript…';
+        result.hidden = true;
+
+        try {
+          const response = await fetch(`/api/transcript?url=${encodeURIComponent(urlInput.value)}`);
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Request failed.');
+
+          document.querySelector('#title').textContent = data.metadata.title;
+          document.querySelector('#meta').textContent = `${data.metadata.channel} · ${data.language_name} · ${data.lengthText}`;
+          document.querySelector('#transcript').textContent = data.transcript
+            .map((segment) => `[${Math.floor(segment.start / 60)}:${String(Math.floor(segment.start % 60)).padStart(2, '0')}] ${segment.text}`)
+            .join('\n');
+          result.hidden = false;
+          status.textContent = '';
+        } catch (error) {
+          status.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
