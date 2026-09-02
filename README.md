@@ -9,7 +9,7 @@ The API key stays on the server. Do not place an API key in front-end JavaScript
 1. Install Node.js 18 or later.
 2. Clone this repository and enter the folder.
 3. Copy `.env.example` to `.env`.
-4. Optionally add `TUBETOTRANSCRIPT_API_KEY` to `.env` for your account's API rate limit. Requests work without a key at the public rate limit.
+4. Add your `TUBETOTRANSCRIPT_API_KEY` to `.env`. The v1 API requires a key — create a free one at [tubetotranscript.com/signup](https://www.tubetotranscript.com/signup).
 5. Start the project:
 
    ```bash

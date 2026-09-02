@@ -15,7 +15,7 @@ async function loadLocalEnvironment() {
       }
     }
   } catch {
-    // .env is optional; requests can use the public API rate limit without a key.
+    // Missing .env is not fatal here; the missing-key check below reports it clearly.
   }
 }
 
@@ -74,9 +74,16 @@ const server = createServer(async (request, response) => {
       return;
     }
 
+    if (!apiKey) {
+      sendJson(response, 500, {
+        error: 'Set TUBETOTRANSCRIPT_API_KEY in .env — the v1 API requires a key. Create a free one at https://www.tubetotranscript.com/signup'
+      });
+      return;
+    }
+
     try {
       const upstream = await fetch(`${apiBaseUrl}?url=${encodeURIComponent(youtubeUrl)}`, {
-        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
+        headers: { Authorization: `Bearer ${apiKey}` }
       });
       const body = await upstream.text();
       response.writeHead(upstream.status, {
